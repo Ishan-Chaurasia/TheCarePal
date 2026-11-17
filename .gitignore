@@ -35,3 +35,6 @@ lerna-debug.log*
 # Temporary uploads and generated PDFs
 uploads/
 temp/
+
+# AI Agent skills & local development tooling
+.agents/

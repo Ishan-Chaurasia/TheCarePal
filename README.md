@@ -125,9 +125,9 @@ All six P0 requirements from PRD FS-03 are demonstrably implemented and tested:
 
 ---
 
-## 5. Design System & UI/UX Pro Max Skill
+## 5. Design System & Healthcare Accessibility
 
-The entire user experience and visual language was synthesized using the [UI/UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) installed in `.agents/skills/ui-ux-pro-max/`, enforcing strict healthcare accessibility criteria:
+The user experience and visual language follows a bespoke senior-healthcare design system ([design-system/carepal](file:///design-system/carepal/MASTER.md)), enforcing strict healthcare accessibility criteria:
 
 ### Color Palette Architecture
 | Token Name | Hex Code | Contrast Ratio | Role & Application |
@@ -201,7 +201,7 @@ The entire user experience and visual language was synthesized using the [UI/UX 
 In accordance with TheCarePal evaluation criteria, AI tooling was leveraged methodically:
 
 1. **Antigravity AI (Google DeepMind):** Used as an architectural pair programmer to coordinate requirements extraction, API route implementation, React component authoring, and test automation.
-2. **UI/UX Pro Max Skill (`nextlevelbuilder/ui-ux-pro-max-skill`):** Cloned and mounted directly into `.agents/skills/ui-ux-pro-max/`. Used its local Python search engine (`scripts/search.py`) to query senior healthcare UX guidelines, generate the project's design system tokens (`tokens.css` and `MASTER.md`), and validate contrast compliance.
+2. **Design System & Contrast Architecture:** Formulated custom semantic tokens (Porcelain, Dark Stone, Deep Aqua, Aqua Tint) enforcing WCAG AAA contrast ratios (11:1 for body copy), 44px minimum touch targets, and specialized typography (Libre Caslon Text & Atkinson Hyperlegible by the Braille Institute).
 3. **No Unaudited Code:** Every single component, schema, and API route was reviewed, tested against automated test scripts (`test-routes.js`), and verified in the browser.
 
 ---

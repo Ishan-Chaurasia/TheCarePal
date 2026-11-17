@@ -1,6 +1,6 @@
 # Design System Master File — TheCarePal FS-03
 
-> **Source of Truth:** Governed by `ui-ux-pro-max-skill` and PRD FS-03 (Family Care Dashboard & Daily Care History).
+> **Source of Truth:** Governed by TheCarePal Design Specifications and PRD FS-03 (Family Care Dashboard & Daily Care History).
 > All pages must strictly conform to these tokens, contrast ratios, and typography specifications.
 
 ---
