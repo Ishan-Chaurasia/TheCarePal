@@ -215,17 +215,27 @@ class JsonDatabase {
 }
 
 const localDb = new JsonDatabase();
+let connPromise = null;
 
 export async function connectDB() {
   const uri = process.env.MONGO_URI;
   if (uri && uri.trim() !== '') {
+    if (mongoose.connection && mongoose.connection.readyState === 1) {
+      isMongooseConnected = true;
+      return;
+    }
+    if (!connPromise) {
+      const maskedUri = uri.replace(/:[^:@]+@/, ':****@');
+      console.log('Attempting connection to MongoDB at', maskedUri);
+      connPromise = mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+    }
     try {
-      console.log('Attempting connection to MongoDB at', uri);
-      await mongoose.connect(uri, { serverSelectionTimeoutMS: 3000 });
+      await connPromise;
       isMongooseConnected = true;
       console.log('✅ Connected to MongoDB via Mongoose');
       return;
     } catch (err) {
+      connPromise = null;
       console.warn('⚠️ Could not connect to external MongoDB, using zero-config embedded store:', err.message);
     }
   } else {

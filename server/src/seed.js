@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import { connectDB } from './db.js';
 import {
   UserModel,
   PatientModel,
@@ -16,6 +17,7 @@ const NURSE_PASS = process.env.NURSE_SEED_PASSWORD || 'NursePass123!';
 const FAMILY_PASS = process.env.FAMILY_SEED_PASSWORD || 'FamilyPass123!';
 
 export async function runSeed() {
+  await connectDB();
   console.log('--- Commencing Seed for TheCarePal (FS-03) ---');
 
   // 1. Clear existing collections
@@ -489,7 +491,9 @@ export async function runSeed() {
 }
 
 // Auto-run if executed directly via node src/seed.js
-runSeed().catch(err => {
+runSeed().then(() => {
+  process.exit(0);
+}).catch(err => {
   console.error('Seed failed:', err);
   process.exit(1);
 });
