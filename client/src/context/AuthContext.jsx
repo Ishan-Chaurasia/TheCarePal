@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
       } catch (err) {
         setUser(null);
         setPatient(null);
+        localStorage.removeItem('carepal_token');
       } finally {
         setLoading(false);
       }
@@ -34,6 +35,9 @@ export function AuthProvider({ children }) {
     });
     setUser(res.user);
     setPatient(res.patient);
+    if (res.token) {
+      localStorage.setItem('carepal_token', res.token);
+    }
     return res;
   };
 
@@ -43,6 +47,7 @@ export function AuthProvider({ children }) {
     } finally {
       setUser(null);
       setPatient(null);
+      localStorage.removeItem('carepal_token');
     }
   };
 

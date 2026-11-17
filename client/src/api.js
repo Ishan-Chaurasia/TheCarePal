@@ -51,12 +51,17 @@ export async function flushOfflineQueue() {
   console.log(`[OFFLINE SYNC] Attempting to sync ${queue.length} queued care actions…`);
   const remaining = [];
   let synced = 0;
+  const token = localStorage.getItem('carepal_token');
+  const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
   for (const item of queue) {
     try {
       const res = await fetch(`${API_BASE}${item.endpoint}`, {
         method: item.method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
         credentials: 'include',
         body: JSON.stringify(item.body)
       });
@@ -68,7 +73,6 @@ export async function flushOfflineQueue() {
         remaining.push(item);
       }
     } catch (err) {
-      // Still offline or server unreachable
       remaining.push(item);
     }
   }
@@ -81,11 +85,14 @@ export async function flushOfflineQueue() {
 export async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const isWrite = ['POST', 'PATCH', 'PUT', 'DELETE'].includes(options.method?.toUpperCase());
+  const token = localStorage.getItem('carepal_token');
+  const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
 
   const config = {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader,
       ...(options.headers || {})
     },
     credentials: 'include'
@@ -126,7 +133,6 @@ export async function apiRequest(endpoint, options = {}) {
     }
     return data;
   } catch (err) {
-    // If network exception (e.g. airplane mode enabled mid-flight or server dropped)
     if (isWrite && endpoint.includes('/entries')) {
       const parsedBody = JSON.parse(options.body || '{}');
       const clientId = addToOfflineQueue(endpoint, options.method, parsedBody);

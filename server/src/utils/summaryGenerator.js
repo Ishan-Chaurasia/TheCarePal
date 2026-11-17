@@ -33,8 +33,9 @@ export function generateDaySummary(patientName, dayEntries, scheduledDoses = [])
     if (fullMeals.length === mealEntries.length && fullMeals.length >= 2) {
       mealPhrase = `ate meals fully`;
     } else if (fullMeals.length > 0) {
-      const mealTypes = fullMeals.map(m => m.data?.mealType || 'meals').join(' and ');
-      mealPhrase = `ate ${mealTypes} fully`;
+      const uniqueMealTypes = [...new Set(fullMeals.map(m => m.data?.mealType?.toLowerCase() || 'meals'))];
+      const formattedMeals = uniqueMealTypes.join(' and ');
+      mealPhrase = `ate ${formattedMeals} fully`;
     } else {
       mealPhrase = `had lighter meals`;
     }
