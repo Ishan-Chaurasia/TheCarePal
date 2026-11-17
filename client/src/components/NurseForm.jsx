@@ -13,7 +13,8 @@ import {
   Upload,
   Camera,
   Check,
-  X
+  X,
+  Radio
 } from 'lucide-react';
 import PlateGlyph from './PlateGlyph.jsx';
 
@@ -29,11 +30,11 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   const [loadingSchedule, setLoadingSchedule] = useState(false);
 
   // Section Save Statuses (N9: Independent saving with clear saved / failed states)
-  const [statusVitals, setStatusVitals] = useState({ state: 'idle', msg: '' });
-  const [statusMeal, setStatusMeal] = useState({ state: 'idle', msg: '' });
-  const [statusActivity, setStatusActivity] = useState({ state: 'idle', msg: '' });
-  const [statusMood, setStatusMood] = useState({ state: 'idle', msg: '' });
-  const [statusNote, setStatusNote] = useState({ state: 'idle', msg: '' });
+  const [statusVitals, setStatusVitals] = useState({ state: 'idle', msg: '', isOffline: false });
+  const [statusMeal, setStatusMeal] = useState({ state: 'idle', msg: '', isOffline: false });
+  const [statusActivity, setStatusActivity] = useState({ state: 'idle', msg: '', isOffline: false });
+  const [statusMood, setStatusMood] = useState({ state: 'idle', msg: '', isOffline: false });
+  const [statusNote, setStatusNote] = useState({ state: 'idle', msg: '', isOffline: false });
 
   // 1. Vitals state
   const [bpSys, setBpSys] = useState('');
@@ -95,11 +96,11 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   // Save Vitals independently
   const handleSaveVitals = async (e) => {
     e.preventDefault();
-    setStatusVitals({ state: 'saving', msg: 'Saving vitals…' });
+    setStatusVitals({ state: 'saving', msg: 'Saving vitals…', isOffline: false });
+    let wasOffline = false;
     try {
-      // Save BP if entered
       if (bpSys && bpDia) {
-        await apiRequest(`/patients/${patient._id}/entries`, {
+        const r = await apiRequest(`/patients/${patient._id}/entries`, {
           method: 'POST',
           body: JSON.stringify({
             kind: 'vital',
@@ -113,10 +114,10 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
             }
           })
         });
+        if (r?.offline) wasOffline = true;
       }
-      // Pulse
       if (pulse) {
-        await apiRequest(`/patients/${patient._id}/entries`, {
+        const r = await apiRequest(`/patients/${patient._id}/entries`, {
           method: 'POST',
           body: JSON.stringify({
             kind: 'vital',
@@ -125,10 +126,10 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
             data: { vitalType: 'pulse', value: Number(pulse), unit: 'bpm' }
           })
         });
+        if (r?.offline) wasOffline = true;
       }
-      // SpO2
       if (spo2) {
-        await apiRequest(`/patients/${patient._id}/entries`, {
+        const r = await apiRequest(`/patients/${patient._id}/entries`, {
           method: 'POST',
           body: JSON.stringify({
             kind: 'vital',
@@ -137,10 +138,10 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
             data: { vitalType: 'spo2', value: Number(spo2), unit: '%' }
           })
         });
+        if (r?.offline) wasOffline = true;
       }
-      // Sugar
       if (sugar) {
-        await apiRequest(`/patients/${patient._id}/entries`, {
+        const r = await apiRequest(`/patients/${patient._id}/entries`, {
           method: 'POST',
           body: JSON.stringify({
             kind: 'vital',
@@ -149,10 +150,10 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
             data: { vitalType: 'bloodSugar', value: Number(sugar), unit: 'mg/dL', timing: sugarTiming }
           })
         });
+        if (r?.offline) wasOffline = true;
       }
-      // Temp
       if (temp) {
-        await apiRequest(`/patients/${patient._id}/entries`, {
+        const r = await apiRequest(`/patients/${patient._id}/entries`, {
           method: 'POST',
           body: JSON.stringify({
             kind: 'vital',
@@ -161,20 +162,24 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
             data: { vitalType: 'temperature', value: Number(temp), unit: '°F' }
           })
         });
+        if (r?.offline) wasOffline = true;
       }
 
-      setStatusVitals({ state: 'saved', msg: 'Vitals saved successfully' });
+      setStatusVitals({
+        state: 'saved',
+        msg: wasOffline ? 'Saved to offline queue (will sync when online)' : 'Vitals saved successfully',
+        isOffline: wasOffline
+      });
       onEntrySaved();
-      // Reset inputs
       setBpSys('');
       setBpDia('');
       setPulse('');
       setSpo2('');
       setSugar('');
       setTemp('');
-      setTimeout(() => setStatusVitals({ state: 'idle', msg: '' }), 4000);
+      setTimeout(() => setStatusVitals({ state: 'idle', msg: '', isOffline: false }), 4000);
     } catch (err) {
-      setStatusVitals({ state: 'error', msg: "Couldn't save vitals. What you typed is still here. Try again." });
+      setStatusVitals({ state: 'error', msg: "Couldn't save vitals. What you typed is still here. Try again.", isOffline: false });
     }
   };
 
@@ -182,9 +187,9 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   const handleSaveMeal = async (e) => {
     e.preventDefault();
     if (!mealItems.trim()) return;
-    setStatusMeal({ state: 'saving', msg: 'Saving meal…' });
+    setStatusMeal({ state: 'saving', msg: 'Saving meal…', isOffline: false });
     try {
-      await apiRequest(`/patients/${patient._id}/entries`, {
+      const res = await apiRequest(`/patients/${patient._id}/entries`, {
         method: 'POST',
         body: JSON.stringify({
           kind: 'meal',
@@ -199,13 +204,18 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           photos: attachedPhotos
         })
       });
-      setStatusMeal({ state: 'saved', msg: 'Meal entry saved' });
+      const wasOffline = !!res?.offline;
+      setStatusMeal({
+        state: 'saved',
+        msg: wasOffline ? 'Saved to offline queue (will sync when online)' : 'Meal entry saved',
+        isOffline: wasOffline
+      });
       setMealItems('');
       setAttachedPhotos([]);
       onEntrySaved();
-      setTimeout(() => setStatusMeal({ state: 'idle', msg: '' }), 4000);
+      setTimeout(() => setStatusMeal({ state: 'idle', msg: '', isOffline: false }), 4000);
     } catch (err) {
-      setStatusMeal({ state: 'error', msg: "Couldn't save meal. What you typed is kept." });
+      setStatusMeal({ state: 'error', msg: "Couldn't save meal. What you typed is kept.", isOffline: false });
     }
   };
 
@@ -230,7 +240,6 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
         })
       });
 
-      // Update local state
       setScheduledItems(prev => prev.map(s => {
         if (s.scheduleId === item.scheduleId && s.scheduledTime === item.scheduledTime) {
           return {
@@ -249,9 +258,9 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   // Save Activity independently
   const handleSaveActivity = async (e) => {
     e.preventDefault();
-    setStatusActivity({ state: 'saving', msg: 'Saving activity…' });
+    setStatusActivity({ state: 'saving', msg: 'Saving activity…', isOffline: false });
     try {
-      await apiRequest(`/patients/${patient._id}/entries`, {
+      const res = await apiRequest(`/patients/${patient._id}/entries`, {
         method: 'POST',
         body: JSON.stringify({
           kind: 'activity',
@@ -264,21 +273,26 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           }
         })
       });
-      setStatusActivity({ state: 'saved', msg: 'Activity saved' });
+      const wasOffline = !!res?.offline;
+      setStatusActivity({
+        state: 'saved',
+        msg: wasOffline ? 'Saved to offline queue' : 'Activity saved',
+        isOffline: wasOffline
+      });
       setActivityNotes('');
       onEntrySaved();
-      setTimeout(() => setStatusActivity({ state: 'idle', msg: '' }), 4000);
+      setTimeout(() => setStatusActivity({ state: 'idle', msg: '', isOffline: false }), 4000);
     } catch (err) {
-      setStatusActivity({ state: 'error', msg: "Couldn't save activity." });
+      setStatusActivity({ state: 'error', msg: "Couldn't save activity.", isOffline: false });
     }
   };
 
   // Save Mood independently
   const handleSaveMood = async (e) => {
     e.preventDefault();
-    setStatusMood({ state: 'saving', msg: 'Recording mood…' });
+    setStatusMood({ state: 'saving', msg: 'Recording mood…', isOffline: false });
     try {
-      await apiRequest(`/patients/${patient._id}/entries`, {
+      const res = await apiRequest(`/patients/${patient._id}/entries`, {
         method: 'POST',
         body: JSON.stringify({
           kind: 'mood',
@@ -290,12 +304,17 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           }
         })
       });
-      setStatusMood({ state: 'saved', msg: 'Mood recorded' });
+      const wasOffline = !!res?.offline;
+      setStatusMood({
+        state: 'saved',
+        msg: wasOffline ? 'Saved to offline queue' : 'Mood recorded',
+        isOffline: wasOffline
+      });
       setMoodContext('');
       onEntrySaved();
-      setTimeout(() => setStatusMood({ state: 'idle', msg: '' }), 4000);
+      setTimeout(() => setStatusMood({ state: 'idle', msg: '', isOffline: false }), 4000);
     } catch (err) {
-      setStatusMood({ state: 'error', msg: "Couldn't record mood." });
+      setStatusMood({ state: 'error', msg: "Couldn't record mood.", isOffline: false });
     }
   };
 
@@ -303,9 +322,9 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   const handleSaveNote = async (e) => {
     e.preventDefault();
     if (!observationText.trim()) return;
-    setStatusNote({ state: 'saving', msg: 'Saving note…' });
+    setStatusNote({ state: 'saving', msg: 'Saving note…', isOffline: false });
     try {
-      await apiRequest(`/patients/${patient._id}/entries`, {
+      const res = await apiRequest(`/patients/${patient._id}/entries`, {
         method: 'POST',
         body: JSON.stringify({
           kind: 'observation',
@@ -315,13 +334,18 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           photos: attachedPhotos
         })
       });
-      setStatusNote({ state: 'saved', msg: 'Observation note saved' });
+      const wasOffline = !!res?.offline;
+      setStatusNote({
+        state: 'saved',
+        msg: wasOffline ? 'Saved to offline queue' : 'Observation note saved',
+        isOffline: wasOffline
+      });
       setObservationText('');
       setAttachedPhotos([]);
       onEntrySaved();
-      setTimeout(() => setStatusNote({ state: 'idle', msg: '' }), 4000);
+      setTimeout(() => setStatusNote({ state: 'idle', msg: '', isOffline: false }), 4000);
     } catch (err) {
-      setStatusNote({ state: 'error', msg: "Couldn't save note. Text is preserved." });
+      setStatusNote({ state: 'error', msg: "Couldn't save note. Text is preserved.", isOffline: false });
     }
   };
 
@@ -387,8 +411,9 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               </h2>
             </div>
             {statusVitals.state === 'saved' && (
-              <span className="text-xs font-bold text-[#16A34A] flex items-center gap-1">
-                <Check className="w-4 h-4" /> Saved
+              <span className={`text-xs font-bold flex items-center gap-1 ${statusVitals.isOffline ? 'text-[#17707F]' : 'text-[#16A34A]'}`}>
+                {statusVitals.isOffline ? <Radio className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                {statusVitals.msg}
               </span>
             )}
           </div>
@@ -540,14 +565,14 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               </h2>
             </div>
             {statusMeal.state === 'saved' && (
-              <span className="text-xs font-bold text-[#16A34A] flex items-center gap-1">
-                <Check className="w-4 h-4" /> Saved
+              <span className={`text-xs font-bold flex items-center gap-1 ${statusMeal.isOffline ? 'text-[#17707F]' : 'text-[#16A34A]'}`}>
+                {statusMeal.isOffline ? <Radio className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                {statusMeal.msg}
               </span>
             )}
           </div>
 
           <form onSubmit={handleSaveMeal} className="space-y-4">
-            {/* Meal Type selection */}
             <div className="flex gap-2">
               {['breakfast', 'lunch', 'dinner', 'snack'].map((type) => (
                 <button
@@ -565,7 +590,6 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               ))}
             </div>
 
-            {/* What was eaten */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#3A342D] mb-1">
                 What was eaten (free text)
@@ -580,7 +604,6 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               />
             </div>
 
-            {/* Five-step portion control */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#3A342D] mb-2">
                 Portion completed
@@ -610,7 +633,6 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               </div>
             </div>
 
-            {/* Water intake */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#3A342D] mb-1">
                 Water added (ml)
@@ -688,7 +710,6 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
                       )}
                     </div>
 
-                    {/* Action buttons */}
                     <div className="flex items-center gap-2 shrink-0">
                       {logged ? (
                         logged.status === 'given' ? (
@@ -741,8 +762,9 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               </h2>
             </div>
             {statusActivity.state === 'saved' && (
-              <span className="text-xs font-bold text-[#16A34A] flex items-center gap-1">
-                <Check className="w-4 h-4" /> Saved
+              <span className={`text-xs font-bold flex items-center gap-1 ${statusActivity.isOffline ? 'text-[#17707F]' : 'text-[#16A34A]'}`}>
+                {statusActivity.isOffline ? <Radio className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                {statusActivity.msg}
               </span>
             )}
           </div>
@@ -814,14 +836,14 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               </h2>
             </div>
             {statusMood.state === 'saved' && (
-              <span className="text-xs font-bold text-[#16A34A] flex items-center gap-1">
-                <Check className="w-4 h-4" /> Saved
+              <span className={`text-xs font-bold flex items-center gap-1 ${statusMood.isOffline ? 'text-[#17707F]' : 'text-[#16A34A]'}`}>
+                {statusMood.isOffline ? <Radio className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                {statusMood.msg}
               </span>
             )}
           </div>
 
           <form onSubmit={handleSaveMood} className="space-y-4">
-            {/* Five-step scale: Low, Down, Steady, Good, Cheerful */}
             <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
               {[
                 { id: 'low', label: 'Low' },
@@ -878,8 +900,9 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               </h2>
             </div>
             {statusNote.state === 'saved' && (
-              <span className="text-xs font-bold text-[#16A34A] flex items-center gap-1">
-                <Check className="w-4 h-4" /> Saved
+              <span className={`text-xs font-bold flex items-center gap-1 ${statusNote.isOffline ? 'text-[#17707F]' : 'text-[#16A34A]'}`}>
+                {statusNote.isOffline ? <Radio className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                {statusNote.msg}
               </span>
             )}
           </div>
@@ -899,7 +922,6 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
               />
             </div>
 
-            {/* Photo attachments (P1) */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#3A342D] mb-1.5">
                 Attach photo (optional, up to 3)

@@ -1,13 +1,12 @@
 /**
- * TheCarePal API Client
- * Supports session cookies, offline queuing, and stable error responses.
+ * TheCarePal API Client & Offline PWA Synchronizer (N10)
+ * Uses persistent storage with unique clientIds for zero-duplicate synchronization.
  */
 
 const API_BASE = '/api';
-
-// Offline queue stored in localStorage for resilience (N10)
 const OFFLINE_QUEUE_KEY = 'carepal_offline_queue';
 
+// Retrieve all queued actions
 export function getOfflineQueue() {
   try {
     return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]');
@@ -16,28 +15,40 @@ export function getOfflineQueue() {
   }
 }
 
+// Persist offline queue
 export function saveOfflineQueue(queue) {
   localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+  window.dispatchEvent(new CustomEvent('carepal:queue-change', { detail: { count: queue.length } }));
 }
 
+// Add an entry action to the offline queue
 export function addToOfflineQueue(endpoint, method, body) {
   const queue = getOfflineQueue();
-  const clientId = 'offline_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
-  queue.push({
+  const clientId = 'offline_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+  
+  const queuedItem = {
     id: clientId,
     endpoint,
     method,
-    body: { ...body, clientId },
+    body: {
+      ...body,
+      clientId
+    },
     queuedAt: new Date().toISOString()
-  });
+  };
+
+  queue.push(queuedItem);
   saveOfflineQueue(queue);
+  console.log(`[OFFLINE QUEUE] Action stored: ${method} ${endpoint} (Client ID: ${clientId})`);
   return clientId;
 }
 
+// Flush and synchronize all queued items with server
 export async function flushOfflineQueue() {
   const queue = getOfflineQueue();
-  if (queue.length === 0) return { synced: 0 };
+  if (queue.length === 0) return { synced: 0, remainingCount: 0 };
 
+  console.log(`[OFFLINE SYNC] Attempting to sync ${queue.length} queued care actions…`);
   const remaining = [];
   let synced = 0;
 
@@ -49,12 +60,15 @@ export async function flushOfflineQueue() {
         credentials: 'include',
         body: JSON.stringify(item.body)
       });
+
       if (res.ok) {
         synced++;
+        console.log(`[OFFLINE SYNC] Item successfully synced: ${item.id}`);
       } else {
         remaining.push(item);
       }
     } catch (err) {
+      // Still offline or server unreachable
       remaining.push(item);
     }
   }
@@ -63,17 +77,36 @@ export async function flushOfflineQueue() {
   return { synced, remainingCount: remaining.length };
 }
 
-// Unified fetch wrapper
+// Fetch wrapper with offline failover for write routes
 export async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
+  const isWrite = ['POST', 'PATCH', 'PUT', 'DELETE'].includes(options.method?.toUpperCase());
+
   const config = {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {})
     },
-    credentials: 'include' // Sends httpOnly cookies
+    credentials: 'include'
   };
+
+  // If known to be offline and attempting write, queue immediately
+  if (!navigator.onLine && isWrite && endpoint.includes('/entries')) {
+    const parsedBody = JSON.parse(options.body || '{}');
+    const clientId = addToOfflineQueue(endpoint, options.method, parsedBody);
+    return {
+      success: true,
+      offline: true,
+      message: 'Saved to local device offline queue. Will sync when back online.',
+      entry: {
+        ...parsedBody,
+        clientId,
+        _id: clientId,
+        offlinePending: true
+      }
+    };
+  }
 
   try {
     const res = await fetch(url, config);
@@ -93,14 +126,14 @@ export async function apiRequest(endpoint, options = {}) {
     }
     return data;
   } catch (err) {
-    // If network error and is an entry save, queue offline
-    if (!navigator.onLine && options.method === 'POST' && endpoint.includes('/entries')) {
+    // If network exception (e.g. airplane mode enabled mid-flight or server dropped)
+    if (isWrite && endpoint.includes('/entries')) {
       const parsedBody = JSON.parse(options.body || '{}');
       const clientId = addToOfflineQueue(endpoint, options.method, parsedBody);
       return {
         success: true,
         offline: true,
-        message: 'Saved to offline queue. Will sync when reconnected.',
+        message: 'Saved to local device offline queue. Will sync when back online.',
         entry: {
           ...parsedBody,
           clientId,

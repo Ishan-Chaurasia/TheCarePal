@@ -13945,7 +13945,7 @@
     {
       "_id": "id_tt91bmbmwki01pc",
       "createdAt": "2026-11-17T09:36:43.680Z",
-      "updatedAt": "2026-11-17T09:36:43.680Z",
+      "updatedAt": "2026-11-17T10:00:38.790Z",
       "patientId": "patient_kamla_01",
       "kind": "medicine",
       "day": "2026-11-17",
@@ -13960,7 +13960,8 @@
         "status": "given"
       },
       "authorId": "user_nurse_rekha",
-      "authorName": "Rekha Yadav"
+      "authorName": "Rekha Yadav",
+      "editedAt": "2026-11-17T10:00:38.790Z"
     },
     {
       "_id": "id_wt0rdjimwki01pc",
@@ -14174,6 +14175,214 @@
       "clientId": null,
       "isDeleted": false,
       "editedAt": "2026-11-17T09:36:44.415Z"
+    },
+    {
+      "_id": "id_wpjhmk5mwkiwh8n",
+      "createdAt": "2026-11-17T10:01:56.807Z",
+      "updatedAt": "2026-11-17T10:01:56.807Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:01:56.807Z",
+      "day": "2026-11-17",
+      "time": "15:31",
+      "data": {
+        "vitalType": "bloodPressure",
+        "systolic": 128,
+        "diastolic": 82,
+        "unit": "mmHg",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "90–139 / 60–89 mmHg"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_0dvpozimwkiwh8u",
+      "createdAt": "2026-11-17T10:01:56.814Z",
+      "updatedAt": "2026-11-17T10:01:56.814Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:01:56.814Z",
+      "day": "2026-11-17",
+      "time": "15:31",
+      "data": {
+        "vitalType": "pulse",
+        "value": 70,
+        "unit": "bpm",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "60–100 bpm"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_i4ifh8bmwkiwh94",
+      "createdAt": "2026-11-17T10:01:56.824Z",
+      "updatedAt": "2026-11-17T10:01:56.824Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:01:56.824Z",
+      "day": "2026-11-17",
+      "time": "15:31",
+      "data": {
+        "vitalType": "spo2",
+        "value": 95,
+        "unit": "%",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "94–100 %"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_xinmad1mwkiwh9a",
+      "createdAt": "2026-11-17T10:01:56.830Z",
+      "updatedAt": "2026-11-17T10:01:56.830Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:01:56.830Z",
+      "day": "2026-11-17",
+      "time": "15:31",
+      "data": {
+        "vitalType": "bloodSugar",
+        "value": 110,
+        "unit": "mg/dL",
+        "timing": "afterMeal",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "70–180 mg/dL"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_g12cc4jmwkiwh9g",
+      "createdAt": "2026-11-17T10:01:56.836Z",
+      "updatedAt": "2026-11-17T10:01:56.836Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:01:56.836Z",
+      "day": "2026-11-17",
+      "time": "15:31",
+      "data": {
+        "vitalType": "temperature",
+        "value": 99,
+        "unit": "°F",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "97.0–99.5 °F"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_kotkxq4mwkixp0z",
+      "createdAt": "2026-11-17T10:02:53.555Z",
+      "updatedAt": "2026-11-17T10:02:53.555Z",
+      "patientId": "patient_kamla_01",
+      "kind": "meal",
+      "at": "2026-11-17T10:02:53.555Z",
+      "day": "2026-11-17",
+      "time": "15:32",
+      "data": {
+        "mealType": "dinner",
+        "items": "2 chapatis with dal and rice",
+        "portion": "most",
+        "waterMl": 350
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_eu08e8qmwkj95sv",
+      "createdAt": "2026-11-17T10:11:48.511Z",
+      "updatedAt": "2026-11-17T10:11:48.511Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:11:48.511Z",
+      "day": "2026-11-17",
+      "time": "15:40",
+      "data": {
+        "vitalType": "pulse",
+        "value": 76,
+        "unit": "bpm",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "60–100 bpm"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": "airplanemode_test_1794910308503_1",
+      "isDeleted": false
+    },
+    {
+      "_id": "id_9bcpye9mwkj95sz",
+      "createdAt": "2026-11-17T10:11:48.515Z",
+      "updatedAt": "2026-11-17T10:11:48.515Z",
+      "patientId": "patient_kamla_01",
+      "kind": "meal",
+      "at": "2026-11-17T10:11:48.515Z",
+      "day": "2026-11-17",
+      "time": "15:45",
+      "data": {
+        "mealType": "snack",
+        "items": "Fresh coconut water & 2 biscuits",
+        "portion": "all",
+        "waterMl": 200
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": "airplanemode_test_1794910308503_2",
+      "isDeleted": false
+    },
+    {
+      "_id": "id_p3i1sk6mwkj95t6",
+      "createdAt": "2026-11-17T10:11:48.522Z",
+      "updatedAt": "2026-11-17T10:11:48.522Z",
+      "patientId": "patient_kamla_01",
+      "kind": "activity",
+      "at": "2026-11-17T10:11:48.522Z",
+      "day": "2026-11-17",
+      "time": "15:50",
+      "data": {
+        "activityType": "Walk",
+        "minutes": 15,
+        "notes": "Brief afternoon balcony walk"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": "airplanemode_test_1794910308503_3",
+      "isDeleted": false
     }
   ],
   "alerts": [
@@ -14250,6 +14459,57 @@
         "clientId": null,
         "isDeleted": false,
         "editedAt": "2026-11-17T09:36:44.415Z"
+      }
+    },
+    {
+      "_id": "id_xmq11gomwkiut1m",
+      "createdAt": "2026-11-17T10:00:38.794Z",
+      "updatedAt": "2026-11-17T10:00:38.794Z",
+      "entryId": "id_tt91bmbmwki01pc",
+      "editorId": "user_nurse_rekha",
+      "editorName": "Rekha Yadav",
+      "at": "2026-11-17T10:00:38.794Z",
+      "action": "EDIT",
+      "before": {
+        "_id": "id_tt91bmbmwki01pc",
+        "createdAt": "2026-11-17T09:36:43.680Z",
+        "updatedAt": "2026-11-17T09:36:43.680Z",
+        "patientId": "patient_kamla_01",
+        "kind": "medicine",
+        "day": "2026-11-17",
+        "time": "08:32",
+        "at": "2026-11-17T08:32:00+05:30",
+        "data": {
+          "scheduleId": "sched_amlo_0830",
+          "medicineName": "Amlodipine",
+          "dose": "5 mg",
+          "scheduledTime": "08:30",
+          "givenAt": "08:32",
+          "status": "given"
+        },
+        "authorId": "user_nurse_rekha",
+        "authorName": "Rekha Yadav"
+      },
+      "after": {
+        "_id": "id_tt91bmbmwki01pc",
+        "createdAt": "2026-11-17T09:36:43.680Z",
+        "updatedAt": "2026-11-17T10:00:38.790Z",
+        "patientId": "patient_kamla_01",
+        "kind": "medicine",
+        "day": "2026-11-17",
+        "time": "08:32",
+        "at": "2026-11-17T08:32:00+05:30",
+        "data": {
+          "scheduleId": "sched_amlo_0830",
+          "medicineName": "Amlodipine",
+          "dose": "5 mg",
+          "scheduledTime": "08:30",
+          "givenAt": "08:32",
+          "status": "given"
+        },
+        "authorId": "user_nurse_rekha",
+        "authorName": "Rekha Yadav",
+        "editedAt": "2026-11-17T10:00:38.790Z"
       }
     }
   ]
