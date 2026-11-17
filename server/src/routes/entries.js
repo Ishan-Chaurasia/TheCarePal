@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { requireAuth, requirePatientAccess, requireRole } from '../middleware/auth.js';
 import { EntryModel, EntryAuditModel, AlertModel } from '../models/index.js';
 import { checkVitalOutOfRange } from '../utils/vitalRanges.js';
+import { sendAlertEmail } from '../utils/mailer.js';
 
 const router = express.Router();
 
@@ -15,6 +16,13 @@ const entryCreateSchema = z.object({
   data: z.record(z.any()),
   clientId: z.string().optional(),
   photos: z.array(z.string()).optional()
+});
+
+// GET /api/patients/:id/alerts
+router.get('/:id/alerts', requireAuth, requirePatientAccess, async (req, res) => {
+  const alerts = (await AlertModel.find({ patientId: req.patient._id }))._data || [];
+  alerts.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
+  res.json(alerts);
 });
 
 // POST /api/patients/:id/entries
@@ -62,7 +70,10 @@ router.post('/:id/entries', requireAuth, requireRole(['nurse']), requirePatientA
 
       if (rangeCheck.isOutOfRange) {
         shouldAlert = true;
-        alertReason = `Vital reading out of range: ${vt} recorded as ${data.vitalType === 'bloodPressure' ? `${data.systolic}/${data.diastolic} mmHg` : `${data.value} ${data.unit || ''}`} (${rangeCheck.crossedEdge})`;
+        const valStr = data.vitalType === 'bloodPressure'
+          ? `${data.systolic}/${data.diastolic} mmHg`
+          : `${data.value} ${data.unit || ''}`;
+        alertReason = `Vital reading out of range: ${vt} recorded as ${valStr} (${rangeCheck.crossedEdge})`;
       }
     } else if (kind === 'medicine') {
       if (data.status === 'missed') {
@@ -85,21 +96,22 @@ router.post('/:id/entries', requireAuth, requireRole(['nurse']), requirePatientA
       isDeleted: false
     });
 
-    // Handle alert generation if needed
+    // Handle email alert dispatching (F7: One email per event, never repeated for the same entry)
+    let alertResult = null;
     if (shouldAlert) {
-      await AlertModel.create({
+      alertResult = await sendAlertEmail({
         entryId: newEntry._id,
-        patientId: req.patient._id,
+        patient: req.patient,
         reason: alertReason,
-        recipients: req.patient.familyIds || [],
-        sentAt: new Date().toISOString()
+        vitalOrMedicineDetails: processedData
       });
-      console.log(`[ALERT DISPATCHED] -> To Family for ${req.patient.name}: ${alertReason}`);
     }
 
     res.status(201).json({
       success: true,
-      entry: newEntry
+      entry: newEntry,
+      alertDispatched: shouldAlert,
+      alert: alertResult
     });
   } catch (err) {
     console.error('Error creating entry:', err);
@@ -120,12 +132,10 @@ router.patch('/:id/entries/:entryId', requireAuth, requireRole(['nurse']), requi
       return res.status(404).json({ code: 'NOT_FOUND', message: 'Entry not found.' });
     }
 
-    // Author check
     if (existing.authorId !== req.user._id) {
       return res.status(403).json({ code: 'FORBIDDEN', message: 'You can only edit entries you authored.' });
     }
 
-    // Same-day check (entries can only be edited on the calendar day of care)
     const today = new Date().toISOString().substring(0, 10);
     if (existing.day !== today) {
       return res.status(403).json({
@@ -154,7 +164,6 @@ router.patch('/:id/entries/:entryId', requireAuth, requireRole(['nurse']), requi
       editedAt: new Date().toISOString()
     });
 
-    // Record audit trail
     await EntryAuditModel.create({
       entryId: existing._id,
       editorId: req.user._id,
@@ -185,12 +194,10 @@ router.delete('/:id/entries/:entryId', requireAuth, requireRole(['nurse']), requ
       return res.status(404).json({ code: 'NOT_FOUND', message: 'Entry not found.' });
     }
 
-    // Author check
     if (existing.authorId !== req.user._id) {
       return res.status(403).json({ code: 'FORBIDDEN', message: 'You can only delete entries you authored.' });
     }
 
-    // Same-day check
     const today = new Date().toISOString().substring(0, 10);
     if (existing.day !== today) {
       return res.status(403).json({
@@ -199,13 +206,11 @@ router.delete('/:id/entries/:entryId', requireAuth, requireRole(['nurse']), requ
       });
     }
 
-    // Soft delete
-    const deleted = await EntryModel.findByIdAndUpdate(entryId, {
+    await EntryModel.findByIdAndUpdate(entryId, {
       isDeleted: true,
       deletedAt: new Date().toISOString()
     });
 
-    // Record audit trail
     await EntryAuditModel.create({
       entryId: existing._id,
       editorId: req.user._id,

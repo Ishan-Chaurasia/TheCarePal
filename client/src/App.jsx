@@ -12,6 +12,7 @@ import ReportModal from './components/ReportModal.jsx';
 import PhotoModal from './components/PhotoModal.jsx';
 import AuditTrailModal from './components/AuditTrailModal.jsx';
 import EditEntryModal from './components/EditEntryModal.jsx';
+import AlertDrawerModal from './components/AlertDrawerModal.jsx';
 import OfflineBadge from './components/OfflineBadge.jsx';
 import { apiRequest } from './api.js';
 
@@ -31,6 +32,7 @@ export default function App() {
 
   // Modal states
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
   const [activePhotoUrl, setActivePhotoUrl] = useState(null);
   const [auditEntryId, setAuditEntryId] = useState(null);
   const [editEntryItem, setEditEntryItem] = useState(null);
@@ -102,6 +104,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenReportModal={() => setShowReportModal(true)}
+        onOpenAlertsModal={() => setShowAlertsModal(true)}
       />
 
       {/* Main Tab Views */}
@@ -166,6 +169,13 @@ export default function App() {
         <ReportModal
           patient={patient}
           onClose={() => setShowReportModal(false)}
+        />
+      )}
+
+      {showAlertsModal && (
+        <AlertDrawerModal
+          patientId={patient?._id}
+          onClose={() => setShowAlertsModal(false)}
         />
       )}
 

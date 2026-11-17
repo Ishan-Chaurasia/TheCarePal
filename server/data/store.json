@@ -14383,6 +14383,159 @@
       "photos": [],
       "clientId": "airplanemode_test_1794910308503_3",
       "isDeleted": false
+    },
+    {
+      "_id": "id_fli5w2vmwkjewrr",
+      "createdAt": "2026-11-17T10:16:16.743Z",
+      "updatedAt": "2026-11-17T10:16:16.743Z",
+      "patientId": "patient_kamla_01",
+      "kind": "activity",
+      "at": "2026-11-17T10:16:16.743Z",
+      "day": "2026-11-17",
+      "time": "15:45",
+      "data": {
+        "activityType": "Physiotherapy",
+        "minutes": 25,
+        "notes": ""
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_o030y5dmwkjez5m",
+      "createdAt": "2026-11-17T10:16:19.834Z",
+      "updatedAt": "2026-11-17T10:16:19.834Z",
+      "patientId": "patient_kamla_01",
+      "kind": "mood",
+      "at": "2026-11-17T10:16:19.834Z",
+      "day": "2026-11-17",
+      "time": "15:45",
+      "data": {
+        "scale": "cheerful",
+        "context": ""
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_5wukwwxmwkjftf5",
+      "createdAt": "2026-11-17T10:16:59.057Z",
+      "updatedAt": "2026-11-17T10:16:59.057Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:16:59.057Z",
+      "day": "2026-11-17",
+      "time": "15:46",
+      "data": {
+        "vitalType": "bloodPressure",
+        "systolic": 128,
+        "diastolic": 82,
+        "unit": "mmHg",
+        "isOutOfRange": false,
+        "status": "normal",
+        "crossedEdge": "",
+        "band": "90–139 / 60–89 mmHg"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_vmaaqnmmwkjheee",
+      "createdAt": "2026-11-17T10:18:12.902Z",
+      "updatedAt": "2026-11-17T10:18:12.902Z",
+      "patientId": "patient_kamla_01",
+      "kind": "meal",
+      "at": "2026-11-17T10:18:12.902Z",
+      "day": "2026-11-17",
+      "time": "15:47",
+      "data": {
+        "mealType": "lunch",
+        "items": "Rice",
+        "portion": "most",
+        "waterMl": 600
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": "offline_h37yxh0_mwkjhcdv",
+      "isDeleted": false
+    },
+    {
+      "_id": "id_mh9drksmwkjlbjh",
+      "createdAt": "2026-11-17T10:21:15.821Z",
+      "updatedAt": "2026-11-17T10:21:15.821Z",
+      "patientId": "patient_kamla_01",
+      "kind": "observation",
+      "at": "2026-11-17T10:21:15.821Z",
+      "day": "2026-11-17",
+      "time": "15:49",
+      "data": {
+        "text": "Kamla rested well and got a nap."
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [
+        "/uploads/photo-1794910874663-269168920.webp"
+      ],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_qqupqn4mwkjmqk1",
+      "createdAt": "2026-11-17T10:22:21.937Z",
+      "updatedAt": "2026-11-17T10:22:21.937Z",
+      "patientId": "patient_kamla_01",
+      "kind": "vital",
+      "at": "2026-11-17T10:22:21.936Z",
+      "day": "2026-11-17",
+      "time": "16:00",
+      "data": {
+        "vitalType": "bloodPressure",
+        "systolic": 162,
+        "diastolic": 98,
+        "unit": "mmHg",
+        "isOutOfRange": true,
+        "status": "high",
+        "crossedEdge": "Systolic 162 > 139",
+        "band": "90–139 / 60–89 mmHg"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
+    },
+    {
+      "_id": "id_puf6a9nmwkjmupy",
+      "createdAt": "2026-11-17T10:22:27.334Z",
+      "updatedAt": "2026-11-17T10:22:27.334Z",
+      "patientId": "patient_kamla_01",
+      "kind": "medicine",
+      "at": "2026-11-17T10:22:27.334Z",
+      "day": "2026-11-17",
+      "time": "16:05",
+      "data": {
+        "scheduleId": "sched_metf_test",
+        "medicineName": "Metformin",
+        "dose": "500 mg",
+        "scheduledTime": "20:30",
+        "status": "missed",
+        "reason": "refused by patient"
+      },
+      "authorId": "user_nurse_rekha",
+      "authorName": "Rekha Yadav",
+      "photos": [],
+      "clientId": null,
+      "isDeleted": false
     }
   ],
   "alerts": [
@@ -14397,6 +14550,34 @@
         "user_family_neha"
       ],
       "sentAt": "2026-11-17T09:36:44.408Z"
+    },
+    {
+      "_id": "id_9zwng7imwkjmup6",
+      "createdAt": "2026-11-17T10:22:27.306Z",
+      "updatedAt": "2026-11-17T10:22:27.307Z",
+      "entryId": "id_qqupqn4mwkjmqk1",
+      "patientId": "patient_kamla_01",
+      "reason": "Vital reading out of range: bloodPressure recorded as 162/98 mmHg (Systolic 162 > 139)",
+      "recipients": [
+        "family@thecarepal.com"
+      ],
+      "subject": "[TheCarePal Alert] Care update for Kamla Sharma: Vital reading out of range",
+      "previewUrl": "https://ethereal.email/message/avwq39ZuEQxE6GSJavwq42jCd8MK7BiJAAAAAYbmp9CXX2eI3mQG0f4DPD0",
+      "sentAt": "2026-11-17T10:22:27.306Z"
+    },
+    {
+      "_id": "id_16kitizmwkjmy73",
+      "createdAt": "2026-11-17T10:22:31.839Z",
+      "updatedAt": "2026-11-17T10:22:31.839Z",
+      "entryId": "id_puf6a9nmwkjmupy",
+      "patientId": "patient_kamla_01",
+      "reason": "Scheduled medication missed: Metformin (500 mg) - Reason: \"refused by patient\"",
+      "recipients": [
+        "family@thecarepal.com"
+      ],
+      "subject": "[TheCarePal Alert] Care update for Kamla Sharma: Scheduled medication missed",
+      "previewUrl": "https://ethereal.email/message/avwq39ZuEQxE6GSJavwq6GjCd8MK7BiPAAAAAnL-1UwDn-3.1Nvx5mBSOeM",
+      "sentAt": "2026-11-17T10:22:31.839Z"
     }
   ],
   "entryAudit": [

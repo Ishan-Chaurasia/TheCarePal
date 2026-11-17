@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { User, LogOut, FileText, Activity, Calendar, ClipboardList, PenTool } from 'lucide-react';
+import { User, LogOut, FileText, Activity, Calendar, ClipboardList, PenTool, Bell } from 'lucide-react';
+import { apiRequest } from '../api.js';
 
-export default function TopBar({ activeTab, setActiveTab, onOpenReportModal }) {
+export default function TopBar({ activeTab, setActiveTab, onOpenReportModal, onOpenAlertsModal }) {
   const { user, patient, logout, isNurse } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    async function checkAlerts() {
+      if (!patient?._id) return;
+      try {
+        const res = await apiRequest(`/patients/${patient._id}/alerts`);
+        setAlertCount(res?.length || 0);
+      } catch (e) {
+        // quiet fail
+      }
+    }
+    checkAlerts();
+    const interval = setInterval(checkAlerts, 10000);
+    return () => clearInterval(interval);
+  }, [patient?._id]);
 
   const navItems = [
     { id: 'today', label: 'Today', icon: Calendar },
@@ -59,7 +76,7 @@ export default function TopBar({ activeTab, setActiveTab, onOpenReportModal }) {
             );
           })}
 
-          {/* Nurse Log Round Button if Nurse Role */}
+          {/* Nurse Log Round Button */}
           {isNurse && (
             <button
               type="button"
@@ -76,44 +93,61 @@ export default function TopBar({ activeTab, setActiveTab, onOpenReportModal }) {
           )}
         </nav>
 
-        {/* Right: User Menu */}
-        <div className="relative">
+        {/* Right: Alert Notifications & User Menu */}
+        <div className="flex items-center gap-2">
+          {/* Email Alert Bell */}
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#3A342D] hover:text-[#17707F] p-1.5 rounded-md transition-colors"
-            aria-expanded={menuOpen}
+            onClick={onOpenAlertsModal}
+            className="relative p-2 text-[#3A342D] hover:text-[#17707F] rounded-full hover:bg-[#D9D3CA]/50 transition-colors"
+            title="View email alerts"
+            aria-label="View email alerts"
           >
-            <div className="w-7 h-7 rounded-full bg-[#D9D3CA] flex items-center justify-center text-[#3A342D] font-bold text-xs">
-              {user?.name?.[0] || 'U'}
-            </div>
-            <span className="hidden md:inline">(o) {user?.name?.split(' ')[0] || user?.role}</span>
+            <Bell className="w-4 h-4" />
+            {alertCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#B3261E] ring-2 ring-[#F1F3F2]" />
+            )}
           </button>
 
-          {menuOpen && (
-            <div className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-[#D9D3CA] py-2 z-50 animate-in fade-in zoom-in-95">
-              <div className="px-4 py-2 border-b border-[#D9D3CA]/50">
-                <p className="text-xs font-bold text-[#3A342D]">{user?.name}</p>
-                <p className="text-[11px] text-[#7A7268] capitalize">{user?.role} account</p>
-                {patient && (
-                  <p className="text-[11px] text-[#17707F] font-medium mt-1">
-                    Patient: {patient.name} (78)
-                  </p>
-                )}
+          {/* User Profile Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#3A342D] hover:text-[#17707F] p-1.5 rounded-md transition-colors"
+              aria-expanded={menuOpen}
+            >
+              <div className="w-7 h-7 rounded-full bg-[#D9D3CA] flex items-center justify-center text-[#3A342D] font-bold text-xs">
+                {user?.name?.[0] || 'U'}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  logout();
-                }}
-                className="w-full text-left px-4 py-2 text-xs text-[#B3261E] hover:bg-[#FEE2E2]/50 flex items-center gap-2"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign out</span>
-              </button>
-            </div>
-          )}
+              <span className="hidden md:inline">(o) {user?.name?.split(' ')[0] || user?.role}</span>
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-[#D9D3CA] py-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="px-4 py-2 border-b border-[#D9D3CA]/50">
+                  <p className="text-xs font-bold text-[#3A342D]">{user?.name}</p>
+                  <p className="text-[11px] text-[#7A7268] capitalize">{user?.role} account</p>
+                  {patient && (
+                    <p className="text-[11px] text-[#17707F] font-medium mt-1">
+                      Patient: {patient.name} (78)
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs text-[#B3261E] hover:bg-[#FEE2E2]/50 flex items-center gap-2"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
