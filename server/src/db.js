@@ -228,7 +228,12 @@ export async function connectDB() {
     if (!connPromise) {
       const maskedUri = uri.replace(/:[^:@]+@/, ':****@');
       console.log('Attempting connection to MongoDB at', maskedUri);
-      connPromise = mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+      connPromise = mongoose.connect(uri, {
+        serverSelectionTimeoutMS: 5000,
+        maxPoolSize: 10,
+        minPoolSize: 1,
+        socketTimeoutMS: 30000
+      });
     }
     try {
       await connPromise;

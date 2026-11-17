@@ -4,23 +4,56 @@ import { apiRequest } from '../api.js';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [patient, setPatient] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('carepal_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
 
-  // Load session on start
+  const [patient, setPatient] = useState(() => {
+    try {
+      const saved = localStorage.getItem('carepal_patient');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  // Fast-path: If no token exists, user is definitely logged out; show login immediately with 0ms delay
+  const [loading, setLoading] = useState(() => {
+    const token = localStorage.getItem('carepal_token');
+    const savedUser = localStorage.getItem('carepal_user');
+    return !!(token && !savedUser);
+  });
+
+  // Verify / refresh session in background
   useEffect(() => {
+    const token = localStorage.getItem('carepal_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     async function loadSession() {
       try {
         const res = await apiRequest('/auth/me');
         if (res.user) {
           setUser(res.user);
           setPatient(res.patient);
+          localStorage.setItem('carepal_user', JSON.stringify(res.user));
+          if (res.patient) {
+            localStorage.setItem('carepal_patient', JSON.stringify(res.patient));
+          }
         }
       } catch (err) {
         setUser(null);
         setPatient(null);
         localStorage.removeItem('carepal_token');
+        localStorage.removeItem('carepal_user');
+        localStorage.removeItem('carepal_patient');
       } finally {
         setLoading(false);
       }
@@ -38,6 +71,10 @@ export function AuthProvider({ children }) {
     if (res.token) {
       localStorage.setItem('carepal_token', res.token);
     }
+    localStorage.setItem('carepal_user', JSON.stringify(res.user));
+    if (res.patient) {
+      localStorage.setItem('carepal_patient', JSON.stringify(res.patient));
+    }
     return res;
   };
 
@@ -48,6 +85,8 @@ export function AuthProvider({ children }) {
       setUser(null);
       setPatient(null);
       localStorage.removeItem('carepal_token');
+      localStorage.removeItem('carepal_user');
+      localStorage.removeItem('carepal_patient');
     }
   };
 
