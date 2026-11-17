@@ -216,6 +216,7 @@ class JsonDatabase {
 
 const localDb = new JsonDatabase();
 let connPromise = null;
+let hasLoggedZeroConfig = false;
 
 export async function connectDB() {
   const uri = process.env.MONGO_URI;
@@ -239,7 +240,10 @@ export async function connectDB() {
       console.warn('⚠️ Could not connect to external MongoDB, using zero-config embedded store:', err.message);
     }
   } else {
-    console.log('ℹ️ No MONGO_URI specified, using zero-config embedded store');
+    if (!hasLoggedZeroConfig) {
+      hasLoggedZeroConfig = true;
+      console.log('ℹ️ No MONGO_URI specified, using zero-config embedded store');
+    }
   }
 }
 
