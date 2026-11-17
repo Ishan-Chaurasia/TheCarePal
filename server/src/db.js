@@ -233,8 +233,113 @@ export async function connectDB() {
   }
 }
 
+class CollectionProxy {
+  constructor(name) {
+    this.name = name;
+    this._mongooseModel = null;
+  }
+
+  _getMongooseModel() {
+    if (!this._mongooseModel) {
+      const schema = new mongoose.Schema({
+        _id: { type: String, default: () => 'id_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36) }
+      }, { strict: false, timestamps: true, versionKey: false });
+      this._mongooseModel = mongoose.models[this.name] || mongoose.model(this.name, schema);
+    }
+    return this._mongooseModel;
+  }
+
+  find(query = {}) {
+    if (isMongooseConnected) {
+      const model = this._getMongooseModel();
+      const p = model.find(query).lean().then(docs => {
+        const arr = Array.isArray(docs) ? [...docs] : [];
+        arr._data = arr;
+        return arr;
+      });
+      return p;
+    }
+    return localDb.getCollection(this.name).find(query);
+  }
+
+  async findOne(query = {}) {
+    if (isMongooseConnected) {
+      const doc = await this._getMongooseModel().findOne(query).lean();
+      return doc || null;
+    }
+    return localDb.getCollection(this.name).findOne(query);
+  }
+
+  async findById(id) {
+    if (isMongooseConnected) {
+      const doc = await this._getMongooseModel().findById(id).lean();
+      return doc || null;
+    }
+    return localDb.getCollection(this.name).findById(id);
+  }
+
+  async create(doc) {
+    if (isMongooseConnected) {
+      const payload = {
+        _id: doc._id || 'id_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36),
+        ...doc
+      };
+      const created = await this._getMongooseModel().create(payload);
+      return created && created.toObject ? created.toObject() : JSON.parse(JSON.stringify(created));
+    }
+    return localDb.getCollection(this.name).create(doc);
+  }
+
+  async insertMany(docs) {
+    if (isMongooseConnected) {
+      const docsWithId = docs.map(d => ({
+        _id: d._id || 'id_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36),
+        ...d
+      }));
+      const created = await this._getMongooseModel().insertMany(docsWithId);
+      return created.map(c => (c && c.toObject ? c.toObject() : JSON.parse(JSON.stringify(c))));
+    }
+    return localDb.getCollection(this.name).insertMany(docs);
+  }
+
+  async findByIdAndUpdate(id, update, opts = { new: true }) {
+    if (isMongooseConnected) {
+      const doc = await this._getMongooseModel().findByIdAndUpdate(id, update, { new: true, ...opts }).lean();
+      return doc || null;
+    }
+    return localDb.getCollection(this.name).findByIdAndUpdate(id, update, opts);
+  }
+
+  async findByIdAndDelete(id) {
+    if (isMongooseConnected) {
+      const doc = await this._getMongooseModel().findByIdAndDelete(id).lean();
+      return doc || null;
+    }
+    return localDb.getCollection(this.name).findByIdAndDelete(id);
+  }
+
+  async deleteMany(query = {}) {
+    if (isMongooseConnected) {
+      return this._getMongooseModel().deleteMany(query);
+    }
+    return localDb.getCollection(this.name).deleteMany(query);
+  }
+
+  async countDocuments(query = {}) {
+    if (isMongooseConnected) {
+      return this._getMongooseModel().countDocuments(query);
+    }
+    return localDb.getCollection(this.name).countDocuments(query);
+  }
+}
+
+const proxies = {};
+
 export function getDbCollection(name) {
-  return localDb.getCollection(name);
+  if (!proxies[name]) {
+    proxies[name] = new CollectionProxy(name);
+  }
+  return proxies[name];
 }
 
 export { isMongooseConnected };
