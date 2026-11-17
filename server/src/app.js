@@ -6,8 +6,6 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { connectDB } from './db.js';
-import { UserModel } from './models/index.js';
-import { runSeed } from './seed.js';
 
 import authRoutes from './routes/auth.js';
 import patientRoutes from './routes/patients.js';
@@ -39,18 +37,9 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Ensure DB connected on incoming requests (essential for Vercel serverless cold-starts)
-let isDbInitialized = false;
 app.use(async (req, res, next) => {
   try {
     await connectDB();
-    if (!isDbInitialized) {
-      isDbInitialized = true;
-      const userCount = await UserModel.countDocuments({});
-      if (userCount === 0) {
-        console.log('Database empty: auto-seeding patient Kamla Sharma and 45 days of clinical history...');
-        await runSeed();
-      }
-    }
     next();
   } catch (err) {
     console.error('Database connection middleware error:', err);

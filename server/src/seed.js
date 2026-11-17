@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import { connectDB } from './db.js';
@@ -490,10 +492,15 @@ export async function runSeed() {
   console.log(`- Total Entries Seeded: ${allEntries.length} entries across 45 days.`);
 }
 
-// Auto-run if executed directly via node src/seed.js
-runSeed().then(() => {
-  process.exit(0);
-}).catch(err => {
-  console.error('Seed failed:', err);
-  process.exit(1);
-});
+// Auto-run only if executed directly via node src/seed.js (not when imported)
+const __filename = fileURLToPath(import.meta.url);
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(__filename);
+
+if (isDirectRun) {
+  runSeed().then(() => {
+    process.exit(0);
+  }).catch(err => {
+    console.error('Seed failed:', err);
+    process.exit(1);
+  });
+}
