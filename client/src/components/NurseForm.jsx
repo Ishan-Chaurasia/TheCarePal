@@ -14,12 +14,14 @@ import {
   Camera,
   Check,
   X,
-  Radio
+  Radio,
+  Mail,
+  ExternalLink
 } from 'lucide-react';
 import PlateGlyph from './PlateGlyph.jsx';
+import EmailPreviewModal from './EmailPreviewModal.jsx';
 
 export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
-  // Current logging time: defaults to current clock time, tap to adjust earlier today (N7)
   const getNowTime = () => {
     const d = new Date();
     return d.toTimeString().substring(0, 5);
@@ -29,7 +31,11 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   const [scheduledItems, setScheduledItems] = useState([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
 
-  // Section Save Statuses (N9: Independent saving with clear saved / failed states)
+  // Email Alert Banners & Modals (PRD F7)
+  const [activeAlertBanner, setActiveAlertBanner] = useState(null);
+  const [previewAlert, setPreviewAlert] = useState(null);
+
+  // Section Save Statuses (N9)
   const [statusVitals, setStatusVitals] = useState({ state: 'idle', msg: '', isOffline: false });
   const [statusMeal, setStatusMeal] = useState({ state: 'idle', msg: '', isOffline: false });
   const [statusActivity, setStatusActivity] = useState({ state: 'idle', msg: '', isOffline: false });
@@ -83,7 +89,7 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
     loadSchedule();
   }, [patient?._id, selectedDate]);
 
-  // Real-time out-of-range checking (N1: Out-of-range readings flagged on form before saving)
+  // Real-time out-of-range checking (N1)
   const bpOutOfRange = (bpSys && (Number(bpSys) > 139 || Number(bpSys) < 90)) ||
                        (bpDia && (Number(bpDia) > 89 || Number(bpDia) < 60));
   const pulseOutOfRange = pulse && (Number(pulse) > 100 || Number(pulse) < 60);
@@ -98,6 +104,8 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
     e.preventDefault();
     setStatusVitals({ state: 'saving', msg: 'Saving vitals…', isOffline: false });
     let wasOffline = false;
+    let dispatchedAlert = null;
+
     try {
       if (bpSys && bpDia) {
         const r = await apiRequest(`/patients/${patient._id}/entries`, {
@@ -115,6 +123,7 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           })
         });
         if (r?.offline) wasOffline = true;
+        if (r?.alertDispatched && r?.alert) dispatchedAlert = r.alert;
       }
       if (pulse) {
         const r = await apiRequest(`/patients/${patient._id}/entries`, {
@@ -127,6 +136,7 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           })
         });
         if (r?.offline) wasOffline = true;
+        if (r?.alertDispatched && r?.alert) dispatchedAlert = r.alert;
       }
       if (spo2) {
         const r = await apiRequest(`/patients/${patient._id}/entries`, {
@@ -139,6 +149,7 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           })
         });
         if (r?.offline) wasOffline = true;
+        if (r?.alertDispatched && r?.alert) dispatchedAlert = r.alert;
       }
       if (sugar) {
         const r = await apiRequest(`/patients/${patient._id}/entries`, {
@@ -151,6 +162,7 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           })
         });
         if (r?.offline) wasOffline = true;
+        if (r?.alertDispatched && r?.alert) dispatchedAlert = r.alert;
       }
       if (temp) {
         const r = await apiRequest(`/patients/${patient._id}/entries`, {
@@ -163,6 +175,11 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           })
         });
         if (r?.offline) wasOffline = true;
+        if (r?.alertDispatched && r?.alert) dispatchedAlert = r.alert;
+      }
+
+      if (dispatchedAlert) {
+        setActiveAlertBanner(dispatchedAlert);
       }
 
       setStatusVitals({
@@ -222,7 +239,7 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
   // Mark Medicine Dose (Given or Missed)
   const handleMarkMedicine = async (item, status, reason = '') => {
     try {
-      await apiRequest(`/patients/${patient._id}/entries`, {
+      const res = await apiRequest(`/patients/${patient._id}/entries`, {
         method: 'POST',
         body: JSON.stringify({
           kind: 'medicine',
@@ -239,6 +256,10 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           }
         })
       });
+
+      if (res?.alertDispatched && res?.alert) {
+        setActiveAlertBanner(res.alert);
+      }
 
       setScheduledItems(prev => prev.map(s => {
         if (s.scheduleId === item.scheduleId && s.scheduledTime === item.scheduledTime) {
@@ -399,6 +420,34 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           Set to now
         </button>
       </div>
+
+      {/* Real-time Email Alert Banner (PRD F7) */}
+      {activeAlertBanner && (
+        <div className="bg-[#FFF5F5] border border-[#B3261E] rounded-lg p-3.5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-md animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 text-[#B3261E]">
+            <Mail className="w-4 h-4 shrink-0" />
+            <span>
+              <strong>Emergency email alert sent to family:</strong> {activeAlertBanner.reason}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setPreviewAlert(activeAlertBanner)}
+              className="px-2.5 py-1 bg-[#B3261E] text-white font-bold rounded text-[11px] hover:bg-[#8f1e18] shadow-xs"
+            >
+              Preview Sent Email
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveAlertBanner(null)}
+              className="text-[#7A7268] hover:text-[#3A342D] px-1 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-8">
         {/* ================= SECTION 1: VITALS ================= */}
@@ -963,6 +1012,14 @@ export default function NurseForm({ patient, selectedDate, onEntrySaved }) {
           </form>
         </section>
       </div>
+
+      {/* In-app Email Preview Modal (opened from banner) */}
+      {previewAlert && (
+        <EmailPreviewModal
+          alert={previewAlert}
+          onClose={() => setPreviewAlert(null)}
+        />
+      )}
     </div>
   );
 }

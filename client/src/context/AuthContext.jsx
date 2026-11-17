@@ -18,7 +18,6 @@ export function AuthProvider({ children }) {
           setPatient(res.patient);
         }
       } catch (err) {
-        // Not authenticated
         setUser(null);
         setPatient(null);
       } finally {
@@ -47,12 +46,22 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Quick switch for smooth screen recording demo
+  const quickSwitchDemoRole = async () => {
+    if (user?.role === 'nurse') {
+      return login('family@thecarepal.com', 'FamilyPass123!');
+    } else {
+      return login('nurse@thecarepal.com', 'NursePass123!');
+    }
+  };
+
   const value = {
     user,
     patient,
     loading,
     login,
     logout,
+    quickSwitchDemoRole,
     isNurse: user?.role === 'nurse',
     isFamily: user?.role === 'family'
   };

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { User, LogOut, FileText, Activity, Calendar, ClipboardList, PenTool, Bell } from 'lucide-react';
+import { User, LogOut, FileText, Activity, Calendar, ClipboardList, PenTool, Bell, ArrowLeftRight } from 'lucide-react';
 import { apiRequest } from '../api.js';
 
 export default function TopBar({ activeTab, setActiveTab, onOpenReportModal, onOpenAlertsModal }) {
-  const { user, patient, logout, isNurse } = useAuth();
+  const { user, patient, logout, isNurse, quickSwitchDemoRole } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertCount, setAlertCount] = useState(0);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     async function checkAlerts() {
@@ -19,7 +20,7 @@ export default function TopBar({ activeTab, setActiveTab, onOpenReportModal, onO
       }
     }
     checkAlerts();
-    const interval = setInterval(checkAlerts, 10000);
+    const interval = setInterval(checkAlerts, 4000);
     return () => clearInterval(interval);
   }, [patient?._id]);
 
@@ -29,6 +30,20 @@ export default function TopBar({ activeTab, setActiveTab, onOpenReportModal, onO
     { id: 'weekly', label: 'Weekly summary', icon: ClipboardList },
     { id: 'report', label: 'Report', icon: FileText }
   ];
+
+  const handleQuickSwitch = async () => {
+    setSwitching(true);
+    try {
+      await quickSwitchDemoRole();
+      if (!isNurse) {
+        setActiveTab('nurse-log');
+      } else {
+        setActiveTab('today');
+      }
+    } finally {
+      setSwitching(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-[#F1F3F2] border-b border-[#D9D3CA] shadow-xs">
@@ -93,8 +108,20 @@ export default function TopBar({ activeTab, setActiveTab, onOpenReportModal, onO
           )}
         </nav>
 
-        {/* Right: Alert Notifications & User Menu */}
+        {/* Right: Demo Quick Switcher, Alert Bell & User Menu */}
         <div className="flex items-center gap-2">
+          {/* 1-Click Role Switcher for Video Demo */}
+          <button
+            type="button"
+            onClick={handleQuickSwitch}
+            disabled={switching}
+            className="hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-[#17707F] bg-[#17707F]/10 hover:bg-[#17707F]/20 border border-[#17707F]/30 px-2.5 py-1.5 rounded-md transition-colors"
+            title="Switch between Nurse and Family instantly for demo recording"
+          >
+            <ArrowLeftRight className="w-3 h-3" />
+            <span>Switch to {isNurse ? 'Family (Neha)' : 'Nurse (Rekha)'}</span>
+          </button>
+
           {/* Email Alert Bell */}
           <button
             type="button"
