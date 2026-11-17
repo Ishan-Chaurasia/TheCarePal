@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-porcelain: #F1F3F2;
+  --color-stone-light: #D9D3CA;
+  --color-stone-warm: #A89E91;
+  --color-stone-dark: #3A342D;
+  --color-aqua-blue: #46B3C6;
+  --color-aqua-deep: #17707F;
+  --color-aqua-tint: #D3ECF0;
+  --color-correction-red: #B3261E;
+
+  --font-serif: "Libre Caslon Text", "Libre Caslon Condensed", Georgia, serif;
+  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --font-devanagari: "Noto Sans Devanagari", sans-serif;
+}
+
+:root {
+  --color-porcelain: #F1F3F2;
+  --color-stone-light: #D9D3CA;
+  --color-stone-warm: #A89E91;
+  --color-stone-dark: #3A342D;
+  --color-aqua-blue: #46B3C6;
+  --color-aqua-deep: #17707F;
+  --color-aqua-tint: #D3ECF0;
+  --color-correction-red: #B3261E;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-porcelain);
+  color: var(--color-stone-dark);
+  line-height: 1.5;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numeric tabular values */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accessible focus ring */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-aqua-deep);
+  outline-offset: 2px;
+}
+
+/* Touch targets min 44px */
+button,
+a,
+input[type="button"],
+input[type="submit"] {
+  min-height: 44px;
+}
+
+/* Cursor pointer on interactive items */
+button,
+a,
+select,
+input[type="radio"],
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Print styling for B&W report */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

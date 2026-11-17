@@ -1,0 +1,45 @@
+/* Design Tokens - TheCarePal FS-03 (ui-ux-pro-max) */
+:root {
+  /* PRD Palette */
+  --color-porcelain: #F1F3F2;
+  --color-stone-light: #D9D3CA;
+  --color-stone-warm: #A89E91;
+  --color-stone-dark: #3A342D;
+  --color-aqua-blue: #46B3C6;
+  --color-aqua-deep: #17707F;
+  --color-aqua-tint: #D3ECF0;
+  --color-correction-red: #B3261E;
+
+  /* Semantic mappings */
+  --color-background: var(--color-porcelain);
+  --color-foreground: var(--color-stone-dark);
+  --color-card: #FFFFFF;
+  --color-card-foreground: var(--color-stone-dark);
+  --color-border: var(--color-stone-light);
+  --color-muted: var(--color-stone-light);
+  --color-muted-foreground: var(--color-stone-warm);
+  --color-primary: var(--color-aqua-deep);
+  --color-primary-foreground: var(--color-porcelain);
+  --color-accent: var(--color-aqua-blue);
+  --color-band: var(--color-aqua-tint);
+  --color-destructive: var(--color-correction-red);
+  --color-destructive-foreground: var(--color-porcelain);
+  --color-ring: var(--color-aqua-deep);
+
+  /* Typography */
+  --font-serif: "Libre Caslon Text", "Libre Caslon Condensed", "Playfair Display", Georgia, serif;
+  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-devanagari: "Noto Sans Devanagari", sans-serif;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Touch Target */
+  --touch-target-min: 44px;
+}

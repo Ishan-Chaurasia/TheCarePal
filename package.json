@@ -1,0 +1,14 @@
+{
+  "name": "carepal",
+  "version": "1.0.0",
+  "description": "TheCarePal · Family Care Dashboard & Daily Care History (FS-03)",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "seed": "npm run seed --prefix server",
+    "start": "npm run start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
